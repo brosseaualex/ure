@@ -41,9 +41,23 @@ public class RexFile extends View {
         Injector.getAppComponent().inject(this);
         layers = new ArrayList<>();
         try {
-            GZIPInputStream gunzipStream = new GZIPInputStream(getClass().getResourceAsStream(filename));
-            byte[] decompressed = gunzipStream.readAllBytes();
-            ByteBuffer bb = ByteBuffer.wrap(decompressed);
+            ByteBuffer bb = null;
+            byte[] decompressed = new byte[1024];
+
+            try (GZIPInputStream gunzipStream = new GZIPInputStream(getClass().getResourceAsStream(filename))) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+                int len;
+                while ((len = gunzipStream.read(decompressed)) > 0) {
+                    out.write(decompressed, 0, len);
+                }
+
+                gunzipStream.close();
+                out.close();
+                decompressed = out.toByteArray();
+            }
+
+            bb = ByteBuffer.wrap(decompressed);
             bb.order(ByteOrder.LITTLE_ENDIAN);
             int version = bb.getInt();
             int no_layers = bb.getInt();

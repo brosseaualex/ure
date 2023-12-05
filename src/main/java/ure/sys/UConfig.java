@@ -122,7 +122,7 @@ public class UConfig {
 
     // Game functionality
 
-    private String resourcePath = "src/main/resources/";     // path to resource files
+    private String resourcePath = "resources/";     // path to resource files
     private String savePath = "saves/";                      // path to game save files
 
     private boolean backgroundLoader = true;        // load and save areas in the background?

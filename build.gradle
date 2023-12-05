@@ -24,7 +24,44 @@ plugins {
     id 'application'
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+        resources {
+            srcDir 'resources'
+        }
+        output.resourcesDir = 'build/classes/main'
+    }
+}
 
+// Exclude all resources from the jar
+jar {
+    processResources.exclude('*')
+}
+
+applicationDistribution.from('resources') {
+    into 'bin/resources'
+}
+
+// Allows the 'run' task to see the directories on the classpath
+run {
+    classpath += files('resources')
+}
+
+startScripts {
+    classpath += files('src/dist/placeholder')
+    doLast {
+        def windowsScriptFile = file getWindowsScript()
+        def unixScriptFile = file getUnixScript()
+        windowsScriptFile.text = windowsScriptFile.text.replace('@rem Find java.exe', 'set JAVA_HOME=%JAVA_HOME%/jre')
+        windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\placeholder', '%APP_HOME%\\bin\\resources')
+        unixScriptFile.text = unixScriptFile.text.replace('APP_NAME="URE"', 'APP_NAME="URE"\nJAVA_HOME=$JAVA_HOME/jre')
+        unixScriptFile.text = unixScriptFile.text.replace('$APP_HOME/lib/placeholder', '$APP_HOME/bin/resources')
+        unixScriptFile.text = unixScriptFile.text.replace('exec "$JAVACMD"', 'cd "$( dirname "${BASH_SOURCE[0]}" )" \nexec "$JAVACMD"')
+    }
+}
 
 // Define the main class for the application
 mainClassName = 'ure.ExampleMain'
